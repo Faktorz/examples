@@ -1,2 +1,2 @@
 # examples
-Example Imagestreams and Templates for the Digital Garage.
+Example Imagestreams and Templates for FaktorZ

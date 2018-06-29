@@ -9,7 +9,6 @@
     "metadata": {
         "annotations": {
             "description": "Kubeless Serverless Controller",
-            "iconClass": "icon-kubeless",
             "openshift.io/display-name": "Kubeless",
             "openshift.io/documentation-url": "https://kubeless.io/docs/",
             "openshift.io/long-description": "Kubeless is a framework that lets you deploy small bits of code without having to worry about the underlying infrastructure plumbing. It leverages Kubernetes resources to provide auto-scaling, API routing, monitoring, troubleshooting and more. To introduce you to Kubeless, we have created several guides and examples for you. Start by setting up Kubeless following the quick start guide.",
@@ -87,12 +86,7 @@
                                     },
                                     {
                                         "name": "KUBELESS_NAMESPACE",
-                                        "valueFrom": {
-                                            "fieldRef": {
-                                                "apiVersion": "v1",
-                                                "fieldPath": "metadata.namespace"
-                                            }
-                                        }
+                                        "value": "${KUBELESS_NAMESPACE}"
                                     },
                                     {
                                         "name": "KUBELESS_CONFIG",
@@ -142,7 +136,8 @@
             "description": "The name of the Project workspace.",
             "displayName": "Kubeless Namespace",
             "name": "KUBELESS_NAMESPACE",
-            "value": "metadata.namespace"
+            "required": true,
+            "value": ""
         }
     ]
 }
