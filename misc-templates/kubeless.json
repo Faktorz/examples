@@ -1,0 +1,148 @@
+{
+    "apiVersion": "v1",
+    "kind": "Template",
+    "labels": {
+        "app": "kubeless",
+        "template": "kubeless-template"
+    },
+    "message": "A Kubeless Serverless Controller has been created in your project workspace. Download the CLI at The tutorial at https://github.com/kubeless/kubeless/releases. For more information on using this template on the FaktorZ container platform see http://docs.faktorz.com.",
+    "metadata": {
+        "annotations": {
+            "description": "Kubeless Serverless Controller",
+            "iconClass": "icon-kubeless",
+            "openshift.io/display-name": "Kubeless",
+            "openshift.io/documentation-url": "https://kubeless.io/docs/",
+            "openshift.io/long-description": "Kubeless is a framework that lets you deploy small bits of code without having to worry about the underlying infrastructure plumbing. It leverages Kubernetes resources to provide auto-scaling, API routing, monitoring, troubleshooting and more. To introduce you to Kubeless, we have created several guides and examples for you. Start by setting up Kubeless following the quick start guide.",
+            "openshift.io/provider-display-name": "Bitnami.",
+            "openshift.io/support-url": "https://www.faktorz.com",
+            "tags": "instant-app,kubeless"
+        },
+        "name": "kubeless"
+    },
+    "objects": [
+        {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "creationTimestamp": null,
+                "name": "controller-acct"
+            }
+        },
+        {
+            "apiVersion": "extensions/v1beta1",
+            "kind": "Deployment",
+            "metadata": {
+                "annotations": {
+                    "deployment.kubernetes.io/revision": "1"
+                },
+                "creationTimestamp": null,
+                "generation": 1,
+                "labels": {
+                    "kubeless": "controller"
+                },
+                "name": "kubeless-controller-manager"
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "matchLabels": {
+                        "kubeless": "controller"
+                    }
+                },
+                "strategy": {
+                    "rollingUpdate": {
+                        "maxSurge": 1,
+                        "maxUnavailable": 1
+                    },
+                    "type": "RollingUpdate"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "kubeless": "controller"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "KUBELESS_INGRESS_ENABLED",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "key": "ingress-enabled",
+                                                "name": "kubeless-config"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "KUBELESS_SERVICE_TYPE",
+                                        "valueFrom": {
+                                            "configMapKeyRef": {
+                                                "key": "service-type",
+                                                "name": "kubeless-config"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "KUBELESS_NAMESPACE",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "apiVersion": "v1",
+                                                "fieldPath": "metadata.namespace"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "KUBELESS_CONFIG",
+                                        "value": "kubeless-config"
+                                    }
+                                ],
+                                "image": "bitnami/kubeless-controller-manager:v1.0.0-alpha.3",
+                                "imagePullPolicy": "IfNotPresent",
+                                "name": "kubeless-controller-manager",
+                                "resources": {},
+                                "terminationMessagePath": "/dev/termination-log"
+                            }
+                        ],
+                        "dnsPolicy": "ClusterFirst",
+                        "restartPolicy": "Always",
+                        "securityContext": {},
+                        "serviceAccount": "controller-acct",
+                        "serviceAccountName": "controller-acct",
+                        "terminationGracePeriodSeconds": 30
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "data": {
+                "builder-image": "kubeless/function-image-builder:v1.0.0-alpha.3",
+                "builder-image-secret": "",
+                "deployment": "{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{}}}}}",
+                "enable-build-step": "false",
+                "function-registry-tls-verify": "true",
+                "ingress-enabled": "false",
+                "provision-image": "kubeless/unzip@sha256:f162c062973cca05459834de6ed14c039d45df8cdb76097f50b028a1621b3697",
+                "provision-image-secret": "",
+                "runtime-images": "[\n  {\n    \"ID\": \"python\",\n    \"compiled\": false,\n    \"versions\": [\n      {\n        \"name\": \"python27\",\n        \"version\": \"2.7\",\n        \"runtimeImage\": \"kubeless/python@sha256:07cfb0f3d8b6db045dc317d35d15634d7be5e436944c276bf37b1c630b03add8\",\n        \"initImage\": \"python:2.7\"\n      },\n      {\n        \"name\": \"python34\",\n        \"version\": \"3.4\",\n        \"runtimeImage\": \"kubeless/python@sha256:f19640c547a3f91dbbfb18c15b5e624029b4065c1baf2892144e07c36f0a7c8f\",\n        \"initImage\": \"python:3.4\"\n      },\n      {\n        \"name\": \"python36\",\n        \"version\": \"3.6\",\n        \"runtimeImage\": \"kubeless/python@sha256:0c9f8f727d42625a4e25230cfe612df7488b65f283e7972f84108d87e7443d72\",\n        \"initImage\": \"python:3.6\"\n      }\n    ],\n    \"depName\": \"requirements.txt\",\n    \"fileNameSuffix\": \".py\"\n  },\n  {\n    \"ID\": \"nodejs\",\n    \"compiled\": false,\n    \"versions\": [\n      {\n        \"name\": \"node6\",\n        \"version\": \"6\",\n        \"runtimeImage\": \"kubeless/nodejs@sha256:0a8a72af4cc3bfbfd4fe9bd309cbf486e7493d0dc32a691673b3f0d3fae07487\",\n        \"initImage\": \"node:6.10\"\n      },\n      {\n        \"name\": \"node8\",\n        \"version\": \"8\",\n        \"runtimeImage\": \"kubeless/nodejs@sha256:76ee28dc7e3613845fface2d1c56afc2e6e2c6d6392c724795a7ccc2f5e60582\",\n        \"initImage\": \"node:8\"\n      }\n    ],\n    \"depName\": \"package.json\",\n    \"fileNameSuffix\": \".js\"\n  },\n  {\n    \"ID\": \"ruby\",\n    \"compiled\": false,\n    \"versions\": [\n      {\n        \"name\": \"ruby24\",\n        \"version\": \"2.4\",\n        \"runtimeImage\": \"kubeless/ruby@sha256:01665f1a32fe4fab4195af048627857aa7b100e392ae7f3e25a44bd296d6f105\",\n        \"initImage\": \"bitnami/ruby:2.4\"\n      }\n    ],\n    \"depName\": \"Gemfile\",\n    \"fileNameSuffix\": \".rb\"\n  },\n  {\n    \"ID\": \"php\",\n    \"compiled\": false,\n    \"versions\": [\n      {\n        \"name\": \"php72\",\n        \"version\": \"7.2\",\n        \"runtimeImage\": \"kubeless/php@sha256:9b86066b2640bedcd88acb27f43dfaa2b338f0d74d9d91131ea781402f7ec8ec\",\n        \"initImage\": \"composer:1.6\"\n      }\n    ],\n    \"depName\": \"composer.json\",\n    \"fileNameSuffix\": \".php\"\n  },\n  {\n    \"ID\": \"go\",\n    \"compiled\": true,\n    \"versions\": [\n      {\n        \"name\": \"go1.10\",\n        \"version\": \"1.10\",\n        \"runtimeImage\": \"kubeless/go@sha256:e2fd49f09b6ff8c9bac6f1592b3119ea74237c47e2955a003983e08524cb3ae5\",\n        \"initImage\": \"kubeless/go-init@sha256:983b3f06452321a2299588966817e724d1a9c24be76cf1b12c14843efcdff502\"\n      }\n    ],\n    \"depName\": \"Gopkg.toml\",\n    \"fileNameSuffix\": \".go\"\n  },\n  {\n    \"ID\": \"dotnetcore\",\n    \"compiled\": false,\n    \"versions\": [\n      {\n        \"name\": \"dotnetcore2.0\",\n        \"version\": \"2.0\",\n        \"runtimeImage\": \"allantargino/kubeless-dotnetcore@sha256:0ba7f27a37ff7a789de5b485d64b70be5f6767228357d843d4eb3a492c32f1ed\",\n        \"initImage\": \"allantargino/aspnetcore-build@sha256:12bb717ed47d24c0bde5d454841d0bdc3b9fd90f1e6ad24d08ac02eba40ccc8b\"\n      }\n    ],\n    \"depName\": \"project.csproj\",\n    \"fileNameSuffix\": \".cs\"\n  },\n  {\n    \"ID\": \"java\",\n    \"compiled\": true,\n    \"versions\": [\n      {\n        \"name\": \"java1.8\",\n        \"version\": \"1.8\",\n        \"runtimeImage\": \"kubeless/java@sha256:debf9502545f4c0e955eb60fabb45748c5d98ed9365c4a508c07f38fc7fefaac\",\n        \"initImage\": \"kubeless/java-init@sha256:7e5e4376d3ab76c336d4830c9ed1b7f9407415feca49b8c2bf013e279256878f\"\n      }\n    ],\n    \"depName\": \"pom.xml\",\n    \"fileNameSuffix\": \".java\"\n  }\n]",
+                "service-type": "ClusterIP"
+            },
+            "kind": "ConfigMap",
+            "metadata": {
+                "creationTimestamp": null,
+                "name": "kubeless-config"
+            }
+        }
+    ],
+    "parameters": [
+        {
+            "description": "The name of the Project workspace.",
+            "displayName": "Kubeless Namespace",
+            "name": "KUBELESS_NAMESPACE",
+            "value": "metadata.namespace"
+        }
+    ]
+}
